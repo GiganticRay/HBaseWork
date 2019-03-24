@@ -1,2 +1,17 @@
-# HBaseWork
-made by LeiChao
+# **HBase Work**
+---
+## **在 Hbase 中进行数据的系列操作**
+**环境：jdk1.7.0_67 + hadoop2.7.2 + hbase1.3.1 + 集群分布式安装**
+
+## **实现**
+**1. 查询所有一级部门(没有上级部门的部门)**
+
+**2. 已知rowkey（自拟），查询该部门的所有(直接)子部门信息**
+
+**3. 已知rowkey（自拟），向该部门增加一个子部门**
+
+**4. 已知rowkey（自拟），并且同时删除该部门下的子部门**
+
+**5. 格式化输出 console 数据**
+
+more detail please connect with 1443742816@qq.com
