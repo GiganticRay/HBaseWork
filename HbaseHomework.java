@@ -65,62 +65,20 @@ public class HbaseHomework
 			e.printStackTrace();
 		}
 	}
-
-	@Test
-	public void Search()
-	{
-		System.out.println(config);
-		System.out.println(conn);
-		try{
-			conn.close();
-		} catch (IOException e){
-			e.printStackTrace();
-		}
-		System.out.println(1);
-	}
-
-	@Test
-	public void testGet() throws Exception{
-		Table table = conn.getTable(TableName.valueOf("LCNamespace:departTB"));
-		byte[] rowNameCond = Bytes.toBytes("1_001");
-		byte[] cfCond = Bytes.toBytes("departInfo");
-		byte[] qualifierCond = Bytes.toBytes("name");
-		List<Get> gets = new ArrayList<Get> ();		// 创建存放 Get 实例列表
-		Get get = new Get(rowNameCond);
-		get.addColumn(cfCond, qualifierCond);		// addColumn 根据columnFamily and qualifier创建get对象
-		gets.add(get);	
-		Result[] results = table.get(gets);			// 根据 get 获取 results List
-		
-		for(Result result : results){
-			String row = Bytes.toString(result.getRow());		// 获取行健
-			System.out.println("Row: " + row + " ");	
-			byte[] val = null;		
-			if(result.containsColumn(cfCond, qualifierCond)){	// 指定 column family and qualifier 获取对应单元格
-				val = result.getValue(cfCond, qualifierCond);
-				System.out.println("Value: " + Bytes.toString(val));
-			}
-		}
-		System.out.println(table);
-	}
 	
 	@Test
 	public void allTest() throws Exception{
 		List<Result> resultList = null;
-		resultList = RowkeyFilter("LCNamespace:departTB", "^0_$");							// experiment 3.1
-		// resultList = GetRaw("LCNamespace:departTB", "departInfo", "fpid", "^0_001$");	// experiment 3.2
-		// AddAptAsSonApt("LCNamespace:departTB", "0_002", "4_001");						// experiment 3.3
-		// DeleteHeadApt("LCNamespace:departTB", "0_002");									// experiment 3.4
-		resultList = RowkeyFilter("LCNamespace:departTB", "^*$");							// experiment 4
-		
+		resultList = RowkeyFilter("LCNamespace:departTB", "^0_$");						// experiment 3.1	查询所有顶级部门
+		resultList = GetRaw("LCNamespace:departTB", "departInfo", "fpid", "^0_001$");	// experiment 3.2	获取指定部门的所有子部门
+		AddAptAsSonApt("LCNamespace:departTB", "0_002", "4_001");						// experiment 3.3	给父部门添加一个子部门
+		DeleteHeadApt("LCNamespace:departTB", "0_002");									// experiment 3.4	删除顶级部门操作
+		resultList = RowkeyFilter("LCNamespace:departTB", "^*$");						// experiment 4		格式化输出
+
 		if (resultList != null){
 			// ConsoleRowResultList(resultList);	// 普通输出
 			formatOutput(resultList);				// 表格形式格式化
 		}
-		
-		// PutColumn("LCNamespace:departTB", "0_002", "departInfo", "name", "headApt2");		// 添加一个测试样例
-		// PutColumn("LCNamespace:departTB", "0_002", "sonDepartInfo", "son_num", "0");
-		// PutColumn("LCNamespace:departTB", "4_001", "departInfo", "name", "xuexibu");
-		// PutColumn("LCNamespace:departTB", "4_001", "sonDepartInfo", "son_num", "0");
 	}
 	
 
@@ -138,9 +96,9 @@ public class HbaseHomework
 		byte[] cfCond = Bytes.toBytes(cfName);					// 设置搜索条件
 		byte[] qualifierCond = Bytes.toBytes(qualifierName);
 		
-		Filter regexFilter = new SingleColumnValueFilter(cfCond,qualifierCond,  CompareFilter.CompareOp.EQUAL, new RegexStringComparator(regexString));
+		Filter regexFilter = new SingleColumnValueFilter(cfCond, qualifierCond,  CompareFilter.CompareOp.EQUAL, new RegexStringComparator(regexString));
 		
-		Scan scan = new Scan();
+		Scan scan = new Scan().setStartRow(Bytes.toBytes(0)).setStopRow(Bytes.toBytes(9));	//要设置start\stop，不然 scan 会全表扫描
 		scan.addColumn(cfCond, qualifierCond);					// 设置 scan 的列族:列标示 条件
 		scan.setFilter(regexFilter);
 		
@@ -165,7 +123,7 @@ public class HbaseHomework
         	Table table = conn.getTable(TableName.valueOf(tableName));
             Filter regexFilter = new RowFilter(CompareFilter.CompareOp.EQUAL, new RegexStringComparator(regexString));
             
-            Scan scan = new Scan();
+            Scan scan = new Scan().setStartRow(Bytes.toBytes(0)).setStopRow(Bytes.toBytes(9));;
             scan.setFilter(regexFilter);          
             ResultScanner resultScan = table.getScanner(scan);
             
